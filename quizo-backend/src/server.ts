@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import quizRoutes from "./routes";
+import { connectDB } from "./prisma";
 
 dotenv.config();
 
@@ -10,7 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
+
+connectDB();
 
 app.use("/api", quizRoutes);
 
