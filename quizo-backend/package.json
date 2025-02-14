@@ -23,6 +23,6 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
-    "prebuild": "npm run prisma:generate"
+    "build": "npm run vercel-build && npm run prisma:generate"
   }
 }
