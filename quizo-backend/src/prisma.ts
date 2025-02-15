@@ -4,42 +4,31 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-export const prisma =
-  global.prisma ||
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "info", "warn", "error"]
-        : ["error"],
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: ["error", "warn"],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
   });
+};
 
-if (process.env.NODE_ENV === "development") {
-  global.prisma = prisma;
-}
+export const prisma = global.prisma ?? prismaClientSingleton();
 
 export const connectDB = async () => {
   try {
     await prisma.$connect();
+    console.log("Database connection established");
 
-    await prisma.$queryRaw`SELECT 1`;
-
-    console.log("Database connection established successfully");
-
-    ["SIGINT", "SIGTERM"].forEach((signal) => {
-      process.on(signal, async () => {
-        await prisma.$disconnect();
-        process.exit(0);
-      });
-    });
+    return prisma;
   } catch (error) {
     console.error("Database connection failed:", error);
-
-    try {
-      await prisma.$disconnect();
-    } catch (disconnectError) {
-      console.error("Error during database disconnect:", disconnectError);
-    }
-
-    process.exit(1);
+    throw error;
   }
 };
+
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = prisma;
+}

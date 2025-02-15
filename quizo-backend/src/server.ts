@@ -23,9 +23,15 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-connectDB()
-  .then(() => console.log("Database connected successfully"))
-  .catch((error) => console.error("Database connection error:", error));
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection error:", error);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
@@ -60,5 +66,4 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-const handler = app;
-export default handler;
+export default app;
