@@ -32,9 +32,9 @@ export default function Login() {
       });
 
       if (response.status === 200) {
-        const userId = response.data.userId;
+        const userId = response.data.data.userId;
 
-        localStorage.setItem("userId", JSON.stringify(userId));
+        localStorage.setItem("userId", userId);
         toast.success("Login Successfully !");
         navigate("/");
       }

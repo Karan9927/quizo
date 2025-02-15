@@ -39,8 +39,8 @@ export default function EditQuizPage() {
           params: { userId },
         });
 
-        setTitle(response.data.title);
-        setDescription(response.data.description);
+        setTitle(response.data.data.title);
+        setDescription(response.data.data.description);
       } catch (err) {
         console.error("Error fetching quiz data:", err);
         setError("Failed to load quiz. Please try again.");

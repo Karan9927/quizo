@@ -41,7 +41,7 @@ export default function QuizDetailsPage() {
         const response = await axios.get(`${API_URL}/api/quizzes/${id}`, {
           params: { userId },
         });
-        setQuiz(response.data);
+        setQuiz(response.data.data);
       } catch (err) {
         console.error("Error fetching quiz data:", err);
         setError("Failed to load quiz. Please try again.");

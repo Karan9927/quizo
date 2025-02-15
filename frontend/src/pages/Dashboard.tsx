@@ -25,6 +25,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
 
+  interface QuizResponse {
+    success: boolean;
+    message: string;
+    data: Quiz[];
+  }
+
   useEffect(() => {
     const fetchQuizzes = async () => {
       if (!userId) {
@@ -34,10 +40,13 @@ export default function Dashboard() {
 
       try {
         setLoading(true);
-        const response = await axios.get<Quiz[]>(`${API_URL}/api/quizzes`, {
-          params: { userId },
-        });
-        setQuizzes(response.data);
+        const response = await axios.get<QuizResponse>(
+          `${API_URL}/api/quizzes`,
+          {
+            params: { userId },
+          }
+        );
+        setQuizzes(response.data.data);
       } catch (err) {
         console.error("Error fetching quizzes:", err);
         if (err instanceof Error) {
@@ -112,7 +121,9 @@ export default function Dashboard() {
             >
               <CardHeader>
                 <CardTitle className="text-lg md:text-xl">
-                  <Link to={`/quiz/${quiz.id}`}>{quiz.title}</Link>
+                  <Link className="hover:underline" to={`/quiz/${quiz.id}`}>
+                    {quiz.title}
+                  </Link>
                 </CardTitle>
                 <CardDescription>{quiz.description}</CardDescription>
               </CardHeader>
