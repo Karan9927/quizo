@@ -126,6 +126,7 @@ export default function EditQuizPage() {
               <Button
                 type="submit"
                 className="w-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
+                disabled={isLoading}
               >
                 {isLoading ? <Spinner /> : "Update Quiz"}
               </Button>

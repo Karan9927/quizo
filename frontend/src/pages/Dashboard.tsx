@@ -22,7 +22,7 @@ import { SkeletonCard } from "@/components/ui/skeleton-card";
 export default function Dashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingQuizId, setLoadingQuizId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id: number) => {
     try {
-      setIsLoading(true);
+      setLoadingQuizId(id);
       await axios.delete(`${API_URL}/api/quizzes/${id}`, {
         params: { userId },
       });
@@ -76,7 +76,7 @@ export default function Dashboard() {
       console.error("Error deleting quiz:", err);
       setError("Failed to delete quiz. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoadingQuizId(null);
     }
   };
 
@@ -133,8 +133,9 @@ export default function Dashboard() {
                   variant="destructive"
                   onClick={() => handleDelete(quiz.id)}
                   className="w-full sm:w-auto flex items-center justify-center"
+                  disabled={loadingQuizId === quiz.id}
                 >
-                  {isLoading ? (
+                  {loadingQuizId === quiz.id ? (
                     <Spinner />
                   ) : (
                     <>

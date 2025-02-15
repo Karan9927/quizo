@@ -100,6 +100,7 @@ export default function Login() {
             <Button
               className="w-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
               type="submit"
+              disabled={isLoading}
             >
               {isLoading ? <Spinner /> : "Login"}
             </Button>
