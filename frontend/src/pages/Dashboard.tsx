@@ -13,14 +13,16 @@ import {
 } from "@/components/ui/card";
 import { Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
 import { Quiz } from "../types";
 import { API_URL } from "@/constant";
+import Spinner from "@/components/ui/spinner";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 export default function Dashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
@@ -64,6 +66,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id: number) => {
     try {
+      setIsLoading(true);
       await axios.delete(`${API_URL}/api/quizzes/${id}`, {
         params: { userId },
       });
@@ -72,29 +75,14 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Error deleting quiz:", err);
       setError("Failed to delete quiz. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleEdit = (id: number) => {
     navigate(`/edit-quiz/${id}`);
   };
-
-  const SkeletonCard = () => (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader>
-        <Skeleton className="h-6 w-3/4 mb-2" />
-        <Skeleton className="h-4 w-full" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-1/2" />
-      </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-      </CardFooter>
-    </Card>
-  );
 
   return (
     <DashboardLayout>
@@ -146,8 +134,14 @@ export default function Dashboard() {
                   onClick={() => handleDelete(quiz.id)}
                   className="w-full sm:w-auto flex items-center justify-center"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {isLoading ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>

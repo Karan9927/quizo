@@ -1,20 +1,14 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Edit2 } from "lucide-react";
 import axios from "axios";
-import { Skeleton } from "../components/ui/skeleton";
 import { useNavigate, useParams } from "react-router";
 import { Quiz } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { API_URL } from "@/constant";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 export default function QuizDetailsPage() {
   const [quiz, setQuiz] = useState<Quiz>({
@@ -52,23 +46,6 @@ export default function QuizDetailsPage() {
 
     fetchQuizData();
   }, [id]);
-
-  const SkeletonCard = () => (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader>
-        <Skeleton className="h-6 w-3/4 mb-2" />
-        <Skeleton className="h-4 w-full" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-1/2" />
-      </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-        <Skeleton className="h-10 w-full sm:w-[100px]" />
-      </CardFooter>
-    </Card>
-  );
 
   return (
     <DashboardLayout>

@@ -2,18 +2,19 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutDashboard, PlusCircle, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState(
-    !!localStorage.getItem("userId") ||
-      localStorage.getItem("userId") === undefined
+    !!localStorage.getItem("userId")
   );
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.clear();
     setAuthenticated(false);
+    toast.success("Logged out successfully !");
     navigate("/login");
   };
 

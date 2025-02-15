@@ -15,16 +15,23 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { API_URL } from "@/constant";
 import { toast } from "sonner";
+import Spinner from "@/components/ui/spinner";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+
+    if (!username.trim() || !password.trim()) {
+      toast.error("Please enter both username and password");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/login`, {
         username,
@@ -39,12 +46,17 @@ export default function Login() {
         navigate("/");
       }
     } catch (err: unknown) {
-      setError(
-        err instanceof Error && "response" in err
-          ? (err as { response: { data: { error: string } } }).response.data
-              .error
-          : "Login failed"
-      );
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          toast.error(err.response.data.error || "Invalid credentials");
+        } else if (err.request) {
+          toast.error("Network error. Please check your connection.");
+        } else {
+          toast.error("Login failed. Please try again.");
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,16 +95,13 @@ export default function Login() {
                 className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
-            )}
           </CardContent>
           <CardFooter>
             <Button
               className="w-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
               type="submit"
             >
-              Login
+              {isLoading ? <Spinner /> : "Login"}
             </Button>
           </CardFooter>
         </form>

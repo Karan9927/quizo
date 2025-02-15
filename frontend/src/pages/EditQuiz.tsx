@@ -16,12 +16,14 @@ import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import { toast } from "sonner";
 import { API_URL } from "@/constant";
+import Spinner from "@/components/ui/spinner";
 
 export default function EditQuizPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -62,6 +64,7 @@ export default function EditQuizPage() {
 
     const userId = localStorage.getItem("userId");
 
+    setIsLoading(true);
     try {
       const response = await axios.put(`${API_URL}/api/quizzes/${id}`, {
         title,
@@ -76,13 +79,17 @@ export default function EditQuizPage() {
     } catch (error) {
       console.error("Error updating quiz:", error);
       setError("Failed to update quiz. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <DashboardLayout>
       {loading ? (
-        <p>loading...</p>
+        <div className="flex justify-center items-center">
+          <Spinner color="black" />
+        </div>
       ) : (
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
@@ -120,7 +127,7 @@ export default function EditQuizPage() {
                 type="submit"
                 className="w-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
               >
-                Update Quiz
+                {isLoading ? <Spinner /> : "Update Quiz"}
               </Button>
             </CardFooter>
           </form>

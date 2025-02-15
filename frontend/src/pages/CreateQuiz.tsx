@@ -16,25 +16,27 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { toast } from "sonner";
 import { API_URL } from "@/constant";
+import Spinner from "@/components/ui/spinner";
 
 export default function CreateQuizPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
-      setError("Title and description are required");
+      toast.error("Title and description are required");
       return;
     }
 
+    setIsLoading(true);
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        setError("User ID is required.");
+        console.log("User ID is required.");
         return;
       }
 
@@ -52,7 +54,9 @@ export default function CreateQuizPage() {
       navigate("/");
     } catch (error) {
       console.error("Error creating quiz:", error);
-      setError("Failed to create quiz. Please try again.");
+      toast.error("Failed to create quiz. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,14 +91,13 @@ export default function CreateQuizPage() {
                 className="min-h-[100px] transition-all duration-200 focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
           </CardContent>
           <CardFooter>
             <Button
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
             >
-              Create Quiz
+              {isLoading ? <Spinner /> : "Create Quiz"}
             </Button>
           </CardFooter>
         </form>
