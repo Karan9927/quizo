@@ -136,10 +136,27 @@ export const deleteQuiz = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { userId } = req.query;
+    const { userId } = req.query; // Assuming userId is passed as a query parameter
 
-    if (!id) {
-      res.status(400).json({ error: "Quiz ID is required" });
+    if (!id || !userId) {
+      res.status(400).json({ error: "Quiz ID and User ID are required" });
+      return;
+    }
+
+    // Check if the quiz exists and belongs to the user
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+    });
+
+    if (!quiz) {
+      res.status(404).json({ error: "Quiz not found" });
+      return;
+    }
+
+    if (quiz.teacher_id !== userId) {
+      res
+        .status(403)
+        .json({ error: "Unauthorized: You cannot delete this quiz" });
       return;
     }
 
