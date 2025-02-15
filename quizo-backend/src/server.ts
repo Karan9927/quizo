@@ -8,6 +8,7 @@ dotenv.config();
 
 const app = express();
 
+// CORS configuration
 app.use(
   cors({
     origin: [
@@ -16,28 +17,32 @@ app.use(
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-    ],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.options("*", cors());
-
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
 });
 
-connectDB();
-
+// API routes
 app.use("/api", quizRoutes);
 
+// Handle 404 for API routes
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: "API route not found" });
+});
+
+// Handle root route
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Server is running" });
+});
+
+// Error handling middleware
 app.use(
   (
     err: Error,
@@ -50,10 +55,10 @@ app.use(
   }
 );
 
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
+// Connect to database
+connectDB();
 
+// For local development
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
