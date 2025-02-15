@@ -1,21 +1,45 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as { prisma?: PrismaClient };
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
 export const prisma =
-  globalForPrisma.prisma ||
+  global.prisma ||
   new PrismaClient({
-    log: ["query", "info", "warn", "error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "info", "warn", "error"]
+        : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV === "development") {
+  global.prisma = prisma;
+}
 
 export const connectDB = async () => {
   try {
     await prisma.$connect();
-    console.log("Connected to the database successfully");
+
+    await prisma.$queryRaw`SELECT 1`;
+
+    console.log("Database connection established successfully");
+
+    ["SIGINT", "SIGTERM"].forEach((signal) => {
+      process.on(signal, async () => {
+        await prisma.$disconnect();
+        process.exit(0);
+      });
+    });
   } catch (error) {
-    console.error("Error connecting to the database:", error);
+    console.error("Database connection failed:", error);
+
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectError) {
+      console.error("Error during database disconnect:", disconnectError);
+    }
+
     process.exit(1);
   }
 };

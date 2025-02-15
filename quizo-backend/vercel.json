@@ -8,11 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/favicon.ico",
-      "dest": "public/favicon.ico"
-    },
-    {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "src/server.ts"
     }
   ]
