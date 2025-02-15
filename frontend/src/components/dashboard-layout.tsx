@@ -6,7 +6,8 @@ import { Link, useNavigate } from "react-router";
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState(
-    !!localStorage.getItem("userId")
+    !!localStorage.getItem("userId") ||
+      localStorage.getItem("userId") === undefined
   );
   const navigate = useNavigate();
 
