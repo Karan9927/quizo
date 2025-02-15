@@ -1,19 +1,38 @@
-// controllers/index.ts
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
 import { Prisma } from "@prisma/client";
 
-// Type definitions for better type safety
 interface QuizInput {
   title: string;
   description: string;
   userId: string;
 }
 
-export const login = async (req: Request, res: Response): Promise<void> => {
-  const { username, password } = req.body;
+interface LoginInput {
+  username: string;
+  password: string;
+}
 
-  if (!username || !password) {
+const handleError = (error: unknown, res: Response, message: string) => {
+  console.error(`${message}:`, error);
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Resource already exists",
+      });
+    }
+  }
+  return res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+};
+
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const { username, password }: LoginInput = req.body;
+
+  if (!username?.trim() || !password?.trim()) {
     res.status(400).json({
       success: false,
       message: "Username and password are required",
@@ -23,7 +42,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { username: username.trim() },
       select: {
         id: true,
         username: true,
@@ -47,12 +66,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         username: user.username,
       },
     });
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+  } catch (error) {
+    handleError(error, res, "Login error");
   }
 };
 
@@ -63,7 +78,7 @@ export const createQuiz = async (
   try {
     const { title, description, userId }: QuizInput = req.body;
 
-    if (!title?.trim() || !description?.trim() || !userId) {
+    if (!title?.trim() || !description?.trim() || !userId?.trim()) {
       res.status(400).json({
         success: false,
         message: "Title, description, and user ID are required",
@@ -75,7 +90,7 @@ export const createQuiz = async (
       data: {
         title: title.trim(),
         description: description.trim(),
-        teacher: { connect: { id: userId } },
+        teacher: { connect: { id: userId.trim() } },
       },
     });
 
@@ -85,20 +100,7 @@ export const createQuiz = async (
       data: quiz,
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        res.status(409).json({
-          success: false,
-          message: "A quiz with this title already exists",
-        });
-        return;
-      }
-    }
-    console.error("Create quiz error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating quiz",
-    });
+    handleError(error, res, "Create quiz error");
   }
 };
 
@@ -109,16 +111,16 @@ export const getQuizzes = async (
   try {
     const { userId } = req.query;
 
-    if (!userId) {
+    if (!userId || typeof userId !== "string") {
       res.status(400).json({
         success: false,
-        message: "User ID is required",
+        message: "Valid user ID is required",
       });
       return;
     }
 
     const quizzes = await prisma.quiz.findMany({
-      where: { teacher_id: userId as string },
+      where: { teacher_id: userId },
       orderBy: { created_at: "desc" },
       select: {
         id: true,
@@ -134,11 +136,7 @@ export const getQuizzes = async (
       data: quizzes,
     });
   } catch (error) {
-    console.error("Get quizzes error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving quizzes",
-    });
+    handleError(error, res, "Get quizzes error");
   }
 };
 
@@ -147,18 +145,18 @@ export const getQuiz = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.query;
 
-    if (!id || !userId) {
+    if (!id?.trim() || !userId || typeof userId !== "string") {
       res.status(400).json({
         success: false,
-        message: "Quiz ID and User ID are required",
+        message: "Valid quiz ID and user ID are required",
       });
       return;
     }
 
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id,
-        teacher_id: userId as string,
+        id: id.trim(),
+        teacher_id: userId,
       },
       select: {
         id: true,
@@ -182,11 +180,7 @@ export const getQuiz = async (req: Request, res: Response): Promise<void> => {
       data: quiz,
     });
   } catch (error) {
-    console.error("Get quiz error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving quiz",
-    });
+    handleError(error, res, "Get quiz error");
   }
 };
 
@@ -198,19 +192,18 @@ export const updateQuiz = async (
     const { id } = req.params;
     const { title, description, userId } = req.body;
 
-    if (!id || !userId) {
+    if (!id?.trim() || !userId?.trim()) {
       res.status(400).json({
         success: false,
-        message: "Quiz ID and User ID are required",
+        message: "Valid quiz ID and user ID are required",
       });
       return;
     }
 
-    // First check if quiz exists and belongs to user
     const existingQuiz = await prisma.quiz.findFirst({
       where: {
-        id,
-        teacher_id: userId,
+        id: id.trim(),
+        teacher_id: userId.trim(),
       },
     });
 
@@ -223,10 +216,10 @@ export const updateQuiz = async (
     }
 
     const quiz = await prisma.quiz.update({
-      where: { id },
+      where: { id: id.trim() },
       data: {
-        title: title?.trim(),
-        description: description?.trim(),
+        ...(title && { title: title.trim() }),
+        ...(description && { description: description.trim() }),
       },
     });
 
@@ -236,11 +229,7 @@ export const updateQuiz = async (
       data: quiz,
     });
   } catch (error) {
-    console.error("Update quiz error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error updating quiz",
-    });
+    handleError(error, res, "Update quiz error");
   }
 };
 
@@ -252,18 +241,18 @@ export const deleteQuiz = async (
     const { id } = req.params;
     const { userId } = req.query;
 
-    if (!id || !userId) {
+    if (!id?.trim() || !userId || typeof userId !== "string") {
       res.status(400).json({
         success: false,
-        message: "Quiz ID and User ID are required",
+        message: "Valid quiz ID and user ID are required",
       });
       return;
     }
 
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id,
-        teacher_id: userId as string,
+        id: id.trim(),
+        teacher_id: userId,
       },
     });
 
@@ -276,7 +265,7 @@ export const deleteQuiz = async (
     }
 
     await prisma.quiz.delete({
-      where: { id },
+      where: { id: id.trim() },
     });
 
     res.status(200).json({
@@ -284,10 +273,6 @@ export const deleteQuiz = async (
       message: "Quiz deleted successfully",
     });
   } catch (error) {
-    console.error("Delete quiz error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error deleting quiz",
-    });
+    handleError(error, res, "Delete quiz error");
   }
 };

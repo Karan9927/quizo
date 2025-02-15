@@ -8,7 +8,6 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration
 app.use(
   cors({
     origin: [
@@ -24,25 +23,24 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check route
+connectDB()
+  .then(() => console.log("Database connected successfully"))
+  .catch((error) => console.error("Database connection error:", error));
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-// API routes
 app.use("/api", quizRoutes);
 
-// Handle 404 for API routes
 app.all("/api/*", (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// Handle root route
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
 
-// Error handling middleware
 app.use(
   (
     err: Error,
@@ -55,10 +53,6 @@ app.use(
   }
 );
 
-// Connect to database
-connectDB();
-
-// For local development
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
@@ -66,4 +60,5 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-export default app;
+const handler = app;
+export default handler;

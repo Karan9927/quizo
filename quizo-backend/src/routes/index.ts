@@ -1,5 +1,4 @@
-// routes/index.ts
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import {
   createQuiz,
   getQuizzes,
@@ -11,8 +10,15 @@ import {
 
 const router = Router();
 
-const asyncHandler = (fn: Function) => (req: any, res: any, next: any) => {
-  return Promise.resolve(fn(req, res, next)).catch(next);
+const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch((error) => {
+      console.error("Route error:", error);
+      next(error);
+    });
+  };
 };
 
 router.post("/login", asyncHandler(login));
