@@ -14,6 +14,7 @@ import { BookOpen } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { API_URL } from "@/constant";
+import { toast } from "sonner";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -31,10 +32,10 @@ export default function Login() {
       });
 
       if (response.status === 200) {
-        const { userId } = response.data;
+        const userId = response.data.userId;
 
-        localStorage.setItem("userId", userId);
-
+        localStorage.setItem("userId", JSON.stringify(userId));
+        toast.success("Login Successfully !");
         navigate("/");
       }
     } catch (err: unknown) {
