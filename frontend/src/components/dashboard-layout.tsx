@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutDashboard, PlusCircle, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import Hamburger from "hamburger-react";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,28 +32,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <BookOpen size={32} className="text-blue-500" />
           <span className="text-xl font-bold">Quizo</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="relative w-10 h-10 flex items-center justify-center"
-        >
-          <div
-            className={`w-6 h-0.5 bg-gray-600 transition-all duration-300 ${
-              sidebarOpen ? "rotate-45 translate-y-0.5" : ""
-            }`}
-          ></div>
-          <div
-            className={`w-6 h-0.5 bg-gray-600 transition-all duration-300 absolute ${
-              sidebarOpen ? "opacity-0" : "opacity-100"
-            }`}
-          ></div>
-          <div
-            className={`w-6 h-0.5 bg-gray-600 transition-all duration-300 ${
-              sidebarOpen ? "-rotate-45 -translate-y-0.5" : ""
-            }`}
-          ></div>
-        </Button>
+        <Hamburger toggled={sidebarOpen} toggle={setSidebarOpen} />
       </header>
 
       <aside
