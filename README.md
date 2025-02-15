@@ -33,7 +33,7 @@ Ensure you replace the database URLs with the correct credentials from your Supa
 The backend includes CORS settings to allow requests from both the deployed frontend and local development environments.
 
 ### **Allowed Origins:**
-- **Local Development:** `http://localhost:5174`
+- **Local Development:** `http://localhost:5173`
 - **Production Frontend:** `https://quizo-frontend-eight.vercel.app`
 
 ### **CORS Settings:**
