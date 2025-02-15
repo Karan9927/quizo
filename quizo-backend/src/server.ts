@@ -3,10 +3,13 @@ import cors from "cors";
 import dotenv from "dotenv";
 import quizRoutes from "./routes";
 import { connectDB } from "./prisma";
+import path from "path";
 
 dotenv.config();
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

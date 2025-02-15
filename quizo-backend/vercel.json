@@ -8,8 +8,15 @@
   ],
   "routes": [
     {
+      "src": "/favicon.ico",
+      "dest": "public/favicon.ico"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server.ts"
     }
-  ]
+  ],
+  "static": {
+    "directory": "public"
+  }
 }
